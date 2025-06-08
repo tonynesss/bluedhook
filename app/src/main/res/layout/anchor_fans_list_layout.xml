@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/anchor_fans_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:background="@drawable/bg_tech_space"
+    android:padding="16dp">
+
+    <!-- 顶部状态栏 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:paddingBottom="16dp"
+        tools:background="@drawable/bg_header_glow">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="荧光棒管理系统"
+            android:textColor="#FF00F9FF"
+            android:textSize="20sp"
+            android:fontFamily="sans-serif-medium"
+            android:textStyle="bold"
+            android:shadowColor="#8000F9FF"
+            android:shadowDx="0"
+            android:shadowDy="0"
+            android:shadowRadius="8"/>
+
+        <TextView
+            android:id="@+id/anchor_fans_join_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="已加入粉丝团40个 | 可领取760根"
+            android:textColor="#80FFFFFF"
+            android:textSize="14sp"
+            android:layout_marginTop="4dp"/>
+    </LinearLayout>
+
+    <!-- 数据列表容器 -->
+    <LinearLayout
+        android:id="@+id/anchor_fans_listview"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"/>
+
+    <!-- 底部操作按钮 -->
+    <Button
+        android:id="@+id/give_ybg_button"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="一键领取荧光棒"
+        android:textColor="#FFFFFF"
+        android:textAllCaps="false"
+        tools:background="@drawable/button_state"
+        android:textSize="20dp"
+        android:layout_marginTop="16dp"
+        android:elevation="8dp" />
+
+</LinearLayout>

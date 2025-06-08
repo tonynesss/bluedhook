@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <color name="color_primary">#FF3F51B5</color>
+    <color name="color_accent">#FF4081</color>
+    <color name="text_primary">#FF212121</color>
+    <color name="text_secondary">#FF757575</color>
+    <color name="divider_color">#1FFD3F80</color>
+    <color name="card_background_color">#1E1E3F</color>
+    <color name="chip_normal">#F5F5F5</color>
+    <color name="chip_selected">#E3F2FD</color>
+</resources>

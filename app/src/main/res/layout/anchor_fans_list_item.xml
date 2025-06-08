@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/ll_item_root"
+    tools:background="@drawable/bg_tech_item"
+    android:orientation="horizontal"
+    android:padding="4dp">
+
+    <LinearLayout
+        android:id="@+id/ll_anchor_fans_item_root"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="2dp"
+        tools:background="@drawable/bg_tech_item_inner"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="12dp"
+        tools:ignore="UselessParent">
+
+        <!-- 图标（改为科技风图标） -->
+        <ImageView
+            android:id="@+id/iv_ygb_icon"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginEnd="12dp"
+            app:tint="#00F9FF" />
+        <!-- 文字信息区域 -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <!-- 用户名 -->
+            <TextView
+                android:id="@+id/tv_anchor_fans_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="6dp"
+                android:text="陈平安"
+                android:textColor="#00F9FF"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif-medium"
+                android:shadowColor="#8000F9FF"
+                android:shadowDx="0"
+                android:shadowDy="0"
+                android:shadowRadius="3" />
+
+            <!-- 状态标签 -->
+            <TextView
+                android:id="@+id/tv_anchor_fans_give_state"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                tools:background="@drawable/bg_tech_tag"
+                android:paddingHorizontal="6dp"
+                android:paddingVertical="2dp"
+                android:text="荧光棒待领取"
+                android:textColor="#00FFA3"
+                android:textSize="12sp" />
+
+            <!-- 新增的科技背景容器 -->
+            <LinearLayout
+                android:id="@+id/data_container_bg_ll"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                tools:background="@drawable/bg_tech_data_container"
+                android:padding="8dp"
+                android:layout_marginBottom="6dp">
+
+                <!-- 数据指标 -->
+                <TextView
+                    android:id="@+id/tv_anchor_fans_now_relation"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
+                    android:text="亲密值 11137/13000"
+                    android:textColor="#80FFFFFF"
+                    android:textSize="11sp" />
+
+                <!-- 进度条 -->
+                <LinearLayout
+                    android:id="@+id/anchor_fans_relation_root"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    tools:background="@drawable/bg_tech_progress_track">
+
+                    <!-- 进度条现在放在左边 -->
+                    <View
+                        android:id="@+id/anchor_fans_relation_progress"
+                        android:layout_width="0dp"
+                        android:layout_height="4dp"
+                        android:layout_weight="0.6"
+                        tools:background="@drawable/bg_tech_progress_fill" />
+
+                    <!-- Space放在右边 -->
+                    <Space
+                        android:id="@+id/anchor_fans_relation_space"
+                        android:layout_width="0dp"
+                        android:layout_height="4dp"
+                        android:layout_weight="0.4" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tv_anchor_fans_limit_relation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="今日进度: 0/800"
+                android:textColor="#80FFFFFF"
+                android:textSize="10sp" />
+        </LinearLayout>
+
+        <!-- 操作按钮 -->
+        <Button
+            android:id="@+id/tv_anchor_fans_give_start"
+            android:includeFontPadding="false"
+            android:minHeight="0dp"
+            android:minWidth="0dp"
+            android:paddingVertical="4dp"
+            android:paddingHorizontal="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            tools:background="@drawable/bg_tech_button_small"
+            android:text="赠 送"
+            android:textAlignment="center"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textSize="15sp" />
+    </LinearLayout>
+</LinearLayout>

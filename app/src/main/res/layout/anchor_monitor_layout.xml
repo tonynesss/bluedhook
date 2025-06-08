@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#1A1A1A">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#1A1A1A"
+        android:padding="10dp"
+        android:gravity="center_horizontal">
+        <!-- Title -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="主播开播监听"
+            android:textSize="20sp"
+            android:textColor="#00FFAA"
+            android:textStyle="bold" />
+    </LinearLayout>
+    <!-- List of users -->
+    <LinearLayout
+        android:id="@+id/anchor_monitor_list"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal" />
+    <Button
+        android:id="@+id/anchor_start_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        tools:background="@drawable/neon_button"
+        android:text="开始检测"
+        android:textColor="#4CC9F0"
+        android:textSize="20sp"/>
+
+</LinearLayout>

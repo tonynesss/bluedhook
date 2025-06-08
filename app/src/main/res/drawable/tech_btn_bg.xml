@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="#4000FFFC">  <!-- 加深按下时的涟漪颜色透明度 -->
+
+    <!-- 默认状态 -->
+    <item android:id="@android:id/mask">
+        <shape android:shape="rectangle">
+            <solid android:color="#00FFFC"/>
+            <corners android:radius="2dp"/>
+        </shape>
+    </item>
+
+    <!-- 正常状态背景 -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@android:color/transparent"/>
+            <stroke
+                android:width="1dp"
+                android:color="#00FFFC"/>
+            <corners android:radius="2dp"/>
+        </shape>
+    </item>
+
+    <!-- 按下状态叠加层（可选） -->
+    <item android:id="@android:id/background">
+        <shape android:shape="rectangle">
+            <solid android:color="#1000FFFC"/>
+            <corners android:radius="2dp"/>
+        </shape>
+    </item>
+</ripple>
