@@ -104,14 +104,13 @@ public class BluedHook implements IXposedHookLoadPackage, IXposedHookInitPackage
                                     // 3. 获取并转换文件数据为JSON
                                     JSONObject recordsData = new FileToJsonConverter().convertFilesToJson();
                                     msgExtra.put("msgExtra", recordsData);
-
+                                    
                                     // 4. 将msgExtra放入主响应
                                     response.put("msgExtra", msgExtra);
                                     // 5. 广播消息
                                     String jsonResponse = response.toString();
                                     Log.d("WebSocketServer", "Broadcasting records: " + jsonResponse);
                                     wsServerManager.broadcastMessage(jsonResponse);
-
                                 } catch (Exception e) {
                                     Log.e("WebSocketServer", "Error processing sync request", e);
                                 }

@@ -4,6 +4,7 @@
     android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
+
     <LinearLayout
         android:id="@+id/ll_ygb_give"
         android:layout_width="0dp"
@@ -16,14 +17,14 @@
         android:paddingRight="10dp"
         android:layout_marginEnd="5dp"
         tools:background="@drawable/anchor_fans_open_item_bg"
-        android:layout_marginBottom="8dp"
-        >
+        android:layout_marginBottom="8dp">
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="0"
             android:text="荧光棒"
-            android:textColor="#FF000000"/>
+            android:textColor="#FF000000" />
 
         <TextView
 
@@ -33,23 +34,37 @@
             android:text="单击领取荧光"
             android:textSize="12sp"
             android:textColor="#747374"
-            android:gravity="right"/>
+            android:gravity="right" />
     </LinearLayout>
+
     <LinearLayout
-        android:id="@+id/ll_ygb_null"
+        android:id="@+id/ll_data_analyzer"
         android:layout_width="0dp"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_weight="1"
         android:gravity="center_vertical"
-        android:layout_marginEnd="6dp"
-        >
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:layout_marginEnd="5dp"
+        tools:background="@drawable/anchor_fans_open_item_bg"
+        android:layout_marginBottom="8dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="0"
-            android:text=""
-            android:textColor="#FFFFFF"/>
+            android:text="飘屏数据"
+            android:textColor="#FF000000" />
 
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="单击分析飘屏数据"
+            android:textSize="12sp"
+            android:textColor="#747374"
+            android:gravity="right" />
     </LinearLayout>
 </LinearLayout>

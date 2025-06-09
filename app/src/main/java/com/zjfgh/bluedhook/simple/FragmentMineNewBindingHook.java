@@ -17,9 +17,11 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -60,13 +62,15 @@ public class FragmentMineNewBindingHook {
         }
         return context;
     }
-    public void hook(){
+
+    public void hook() {
         XposedHelpers.findAndHookMethod("com.soft.blued.databinding.FragmentMineNewBinding", classLoader, "a", View.class, new XC_MethodHook() {
             @Override
             protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                 super.beforeHookedMethod(param);
 
             }
+
             @SuppressLint({"NotifyDataSetChanged", "UseCompatLoadingForDrawables"})
             @Override
             protected void afterHookedMethod(MethodHookParam param) throws Throwable {
@@ -81,10 +85,25 @@ public class FragmentMineNewBindingHook {
                 // 创建一个GradientDrawable对象
                 LinearLayout ll_ygb_give = anchorFansOpenLayout.findViewById(R.id.ll_ygb_give);
                 ll_ygb_give.setBackground(modRes.getDrawable(R.drawable.anchor_fans_open_item_bg, null));
+                LinearLayout ll_data_analyzer = anchorFansOpenLayout.findViewById(R.id.ll_data_analyzer);
+                ll_data_analyzer.setBackground(modRes.getDrawable(R.drawable.anchor_fans_open_item_bg, null));
                 ll_live.addView(anchorFansOpenLayout, 1);
                 ll_ygb_give.setOnClickListener(setToastTgbListener());
+                ll_data_analyzer.setOnClickListener(openDataAnalyzerView());
             }
         });
+    }
+
+    @SuppressLint("UseCompatLoadingForDrawables")
+    private View.OnClickListener openDataAnalyzerView() {
+        return v -> {
+            Activity activity = (Activity) v.getContext();
+            DataAnalyzerView dataAnalyzerView = new DataAnalyzerView(activity);
+            CustomPopupWindow customPopupWindow = new CustomPopupWindow(activity, dataAnalyzerView, Color.parseColor("#FF0A121F"));
+            customPopupWindow.setBackgroundDrawable(modRes.getDrawable(R.drawable.bg_tech_space, null));
+            customPopupWindow.setAnimationStyle(android.R.style.Animation_Dialog);
+            customPopupWindow.showAtCenter();
+        };
     }
 
     @SuppressLint("UseCompatLoadingForDrawables")
@@ -94,8 +113,8 @@ public class FragmentMineNewBindingHook {
             LayoutInflater inflater = (LayoutInflater) v.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             XmlResourceParser anchorFansListLayoutRes = modRes.getLayout(R.layout.anchor_fans_list_layout);
             LinearLayout anchorFansListLayout = (LinearLayout) inflater.inflate(anchorFansListLayoutRes, null, false);
-            anchorFansListLayout.setBackground(modRes.getDrawable(R.drawable.bg_tech_space,null));
-            CustomPopupWindow customPopupWindow = new CustomPopupWindow(activity,anchorFansListLayout,Color.parseColor("#FF0A121F"));
+            anchorFansListLayout.setBackground(modRes.getDrawable(R.drawable.bg_tech_space, null));
+            CustomPopupWindow customPopupWindow = new CustomPopupWindow(activity, anchorFansListLayout, Color.parseColor("#FF0A121F"));
             customPopupWindow.setBackgroundDrawable(modRes.getDrawable(R.drawable.bg_tech_space, null));
             customPopupWindow.setAnimationStyle(android.R.style.Animation_Dialog);
             customPopupWindow.showAtCenter();
@@ -180,7 +199,7 @@ public class FragmentMineNewBindingHook {
                                     .put("anchor", String.valueOf(anchorFansListBean.anchor))
                                     .toString();
 
-                            Response response = NetworkManager.getInstance().post(NetworkManager.getAnchorFansFreeGoodsAPI(),json,AuthManager.fetchAuthHeaders(classLoader));
+                            Response response = NetworkManager.getInstance().post(NetworkManager.getAnchorFansFreeGoodsAPI(), json, AuthManager.fetchAuthHeaders(classLoader));
                             assert response.body() != null;
                             String responseStr = response.body().string();
                             JSONObject jsonObject = new JSONObject(responseStr);

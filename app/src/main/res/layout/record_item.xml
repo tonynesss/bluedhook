@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<HorizontalScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/scrollView"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:fillViewport="true"
+    android:scrollbars="none"
+    android:background="?android:attr/selectableItemBackground">
+
+    <LinearLayout
+        android:id="@+id/contentLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="12dp">
+
+        <!-- 时间 -->
+        <TextView
+            android:id="@+id/time_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#00F9FF"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:paddingEnd="5dp" />
+
+        <!-- 礼物类型 -->
+        <TextView
+            android:id="@+id/gift_type_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#00FFA3"
+            android:textSize="14sp"
+            android:paddingEnd="5dp" />
+
+        <!-- 用户 -->
+        <TextView
+            android:id="@+id/user_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:paddingEnd="5dp" />
+
+        <!-- 礼物 -->
+        <TextView
+            android:id="@+id/gift_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#FF5722"
+            android:textSize="14sp"
+            android:paddingEnd="5dp" />
+
+        <!-- 豆子 -->
+        <TextView
+            android:id="@+id/beans_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#03A9F4"
+            android:textSize="14sp"
+            android:paddingEnd="5dp" />
+
+        <!-- 数量 -->
+        <TextView
+            android:id="@+id/count_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#9C27B0"
+            android:textSize="14sp"
+            android:paddingEnd="5dp" />
+
+        <!-- 总计 -->
+        <TextView
+            android:id="@+id/total_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#009688"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:paddingEnd="5dp" />
+
+        <!-- 接收者 -->
+        <TextView
+            android:id="@+id/to_anchor_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#E91E63"
+            android:textSize="14sp" />
+    </LinearLayout>
+</HorizontalScrollView>

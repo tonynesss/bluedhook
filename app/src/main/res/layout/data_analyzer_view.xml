@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="8dp"
+    tools:background="@drawable/bg_tech_item">
+
+    <!-- 分析控制区域 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingBottom="8dp">
+
+        <CheckBox
+            android:id="@+id/auto_analyze_checkbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="自动分析"
+            android:textColor="#00F9FF" />
+
+        <Button
+            android:id="@+id/analyze_checkbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:elevation="8dp"
+            android:text="手动分析"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textSize="15dp"
+            tools:background="@drawable/button_state" />
+    </LinearLayout>
+
+    <!-- 配置区域 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="8dp">
+
+        <!-- 日期选择 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingBottom="4dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:text="选择日期:"
+                android:textColor="#00FFA3" />
+
+            <Spinner
+                android:id="@+id/date_spinner"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="#00F9FF" />
+        </LinearLayout>
+
+        <!-- 文件类型选择 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:text="选择文件类型:"
+                android:textColor="#00FFA3" />
+
+            <Spinner
+                android:id="@+id/file_type_spinner"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="#00F9FF" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- 过滤条件输入 -->
+    <EditText
+        android:id="@+id/filter_edit_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:hint="输入过滤条件 (支持 | 分隔多个条件)"
+        android:padding="8dp"
+        android:textColor="#E0E0E0"
+        android:textColorHint="#00FFFC" />
+
+    <!-- 统计摘要 -->
+    <TextView
+        android:id="@+id/summary_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:padding="8dp"
+        android:textColor="#00FFA3"
+        android:textSize="18sp"
+        tools:background="@drawable/bg_tech_tag" />
+
+    <!-- 记录列表容器 -->
+    <HorizontalScrollView
+        android:id="@+id/ll_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</LinearLayout>
