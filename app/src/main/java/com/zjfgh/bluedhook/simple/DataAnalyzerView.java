@@ -48,6 +48,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -58,7 +59,7 @@ public class DataAnalyzerView extends FrameLayout {
 
     private JSONObject recordsData;
     private final Map<String, Map<String, List<String>>> recordsMap = new HashMap<>();
-    private final List<RecordItem> currentRecords = new ArrayList<>();
+    private final List<RecordItem> currentRecords = new CopyOnWriteArrayList<>();
     private final List<RecordItem> filteredRecords = new ArrayList<>();
 
     // UI组件
@@ -122,13 +123,15 @@ public class DataAnalyzerView extends FrameLayout {
         Button analyzeCheckbox = view.findViewById(R.id.analyze_checkbox);
         analyzeCheckbox.setBackground(AppContainer.getInstance().getModuleRes().getDrawable(R.drawable.button_state, null));
         analyzeCheckbox.setOnClickListener(v -> analyzeData());
-        GradientDrawable getYbgButtonDrawable = new GradientDrawable();
-        getYbgButtonDrawable.setCornerRadius(25f);
+        GradientDrawable analyzeCheckboxDrawable = new GradientDrawable();
+        analyzeCheckboxDrawable.setCornerRadius(25f);
         dateSpinner = view.findViewById(R.id.date_spinner);
         fileTypeSpinner = view.findViewById(R.id.file_type_spinner);
         filterEditText = view.findViewById(R.id.filter_edit_text);
         summaryTextView = view.findViewById(R.id.summary_text_view);
+        summaryTextView.setBackground(AppContainer.getInstance().getModuleRes().getDrawable(R.drawable.bg_tech_tag, null));
         ViewGroup llRecyclerView = view.findViewById(R.id.ll_recycler_view);
+        llRecyclerView.setBackground(AppContainer.getInstance().getModuleRes().getDrawable(R.drawable.bg_blued_rounded, null));
         RecyclerView recyclerView = new RecyclerView(context);
         llRecyclerView.addView(recyclerView);
         // 设置RecyclerView
@@ -244,26 +247,6 @@ public class DataAnalyzerView extends FrameLayout {
 
         // 保存当前选择
         String currentSelection = (String) dateSpinner.getSelectedItem();
-
-        // 使用更安全的日期比较器
-        Comparator<String> dateComparator = (d1, d2) -> {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-            try {
-                Date date1 = sdf.parse(d1);
-                Date date2 = sdf.parse(d2);
-                return date2.compareTo(date1); // 降序排列
-            } catch (ParseException e) {
-                // 确保比较是确定性的
-                if (d1.equals(d2)) {
-                    return 0;
-                }
-                return d2.compareTo(d1); // 降序排列
-            }
-        };
-
-        // 使用TimSort的兼容模式
-        dates.sort(dateComparator);
-
         ArrayAdapter<String> adapter = getStringArrayAdapter(dates);
         dateSpinner.setAdapter(adapter);
 
@@ -318,7 +301,7 @@ public class DataAnalyzerView extends FrameLayout {
             public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
                 TextView textView = (TextView) super.getView(position, convertView, parent);
                 textView.setTextColor(Color.parseColor("#00F9FF"));  // 设置文字颜色
-                textView.setBackground(AppContainer.getInstance().getModuleRes().getDrawable(R.drawable.bg_tech_space));
+                textView.setBackground(AppContainer.getInstance().getModuleRes().getDrawable(R.drawable.bg_tech_space, null));
                 return textView;
             }
 
@@ -328,7 +311,7 @@ public class DataAnalyzerView extends FrameLayout {
                 // 自定义下拉项样式
                 TextView textView = (TextView) super.getDropDownView(position, convertView, parent);
                 textView.setTextColor(Color.parseColor("#00F9FF"));  // 设置文字颜色
-                textView.setBackground(AppContainer.getInstance().getModuleRes().getDrawable(R.drawable.bg_tech_space));
+                textView.setBackground(AppContainer.getInstance().getModuleRes().getDrawable(R.drawable.bg_tech_space, null));
                 return textView;
             }
         };
@@ -362,19 +345,7 @@ public class DataAnalyzerView extends FrameLayout {
                     currentRecords.add(item);
                 }
             }
-            Log.e("BluedHook", currentRecords.toString());
-            // 按时间排序（最新的在前面）
-            Collections.sort(currentRecords, (r1, r2) -> {
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss", Locale.getDefault());
-                try {
-                    Date date1 = sdf.parse(r1.time);
-                    Date date2 = sdf.parse(r2.time);
-                    return date2.compareTo(date1);
-                } catch (ParseException e) {
-                    return r2.time.compareTo(r1.time);
-                }
-            });
-
+            Collections.reverse(currentRecords);
             // 更新UI
             mainHandler.post(() -> {
                 filterRecords(filterEditText.getText().toString());
@@ -515,15 +486,36 @@ public class DataAnalyzerView extends FrameLayout {
         if (filterText.isEmpty()) {
             filteredRecords.addAll(currentRecords);
         } else {
-            // 分割过滤条件（支持|分隔符）
-            String[] filters = filterText.split("\\|");
+            // 先用 | 分割，处理OR条件
+            String[] orConditions = filterText.split("\\|");
+
             for (RecordItem item : currentRecords) {
-                for (String filter : filters) {
-                    String lowerFilter = filter.trim().toLowerCase();
-                    if (item.contains(lowerFilter)) {
-                        filteredRecords.add(item);
+                boolean matchAnyOr = false;
+
+                // 检查每个OR条件
+                for (String orCondition : orConditions) {
+                    // 用 & 分割，处理AND条件
+                    String[] andConditions = orCondition.trim().split("&");
+                    boolean matchAllAnd = true;
+
+                    // 检查所有AND条件
+                    for (String andCondition : andConditions) {
+                        String lowerCondition = andCondition.trim().toLowerCase();
+                        if (!lowerCondition.isEmpty() && !item.contains(lowerCondition)) {
+                            matchAllAnd = false;
+                            break;
+                        }
+                    }
+
+                    // 如果满足所有AND条件，则此OR条件成立
+                    if (matchAllAnd && andConditions.length > 0) {
+                        matchAnyOr = true;
                         break;
                     }
+                }
+
+                if (matchAnyOr) {
+                    filteredRecords.add(item);
                 }
             }
         }
@@ -544,7 +536,7 @@ public class DataAnalyzerView extends FrameLayout {
 
         for (RecordItem item : filteredRecords) {
             try {
-                int multiplier = Integer.parseInt(item.count);
+                int multiplier = Integer.parseInt(item.count.split("x")[1]);
                 if (multiplier > maxMultiplier) {
                     maxMultiplier = multiplier;
                     maxRecord = item;
@@ -556,7 +548,7 @@ public class DataAnalyzerView extends FrameLayout {
         // 构建摘要文本
         if (maxRecord != null) {
             String timePart = maxRecord.time;
-            String summary = String.format("近期最大出奖 %s %s 抽出 %s %d 倍 共 %s 豆。\n\n",
+            @SuppressLint("DefaultLocale") String summary = String.format("近期最大出奖 %s %s 抽出 %s %d 倍 共 %s 豆。",
                     timePart, maxRecord.user, maxRecord.gift, maxMultiplier, maxRecord.total);
 
 //            // 添加最近三条记录
@@ -709,6 +701,12 @@ public class DataAnalyzerView extends FrameLayout {
             if (!item.toAnchor.isEmpty()) {
                 toAnchorView.setText(" 赠送给 " + item.toAnchor);
             }
+            //拼接字符串用于复制
+            String s = timeView.getText().toString() + giftTypeView.getText()
+                    + userView.getText() + giftView.getText() + beansView.getText()
+                    + countView.getText() + totalView.getText() + toAnchorView.getText();
+            View parentView = (View) timeView.getParent();
+            parentView.setOnClickListener(v -> ModuleTools.copyToClipboard(AppContainer.getInstance().getBluedContext(), "飘屏内容", s));
         }
 
         // 自动滚动方法
