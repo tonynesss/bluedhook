@@ -5,13 +5,11 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,16 +34,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -301,7 +294,7 @@ public class DataAnalyzerView extends FrameLayout {
             public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
                 TextView textView = (TextView) super.getView(position, convertView, parent);
                 textView.setTextColor(Color.parseColor("#00F9FF"));  // 设置文字颜色
-                textView.setBackground(AppContainer.getInstance().getModuleRes().getDrawable(R.drawable.bg_tech_space, null));
+                textView.setBackground(AppContainer.getInstance().getModuleRes().getDrawable(R.drawable.bg_transparent, null));
                 return textView;
             }
 
