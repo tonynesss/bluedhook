@@ -51,7 +51,7 @@ public class BluedHook implements IXposedHookLoadPackage, IXposedHookInitPackage
                     try {
                         VoiceTTS.getInstance(bluedContext);
                     } catch (Exception e) {
-                        Log.e("BluedHook", "VoiceTTS模块异常：\n" +
+                        Log.e("BluedHook", "语音合成模块异常：\n" +
                                 e);
                     }
                     NetworkManager.getInstance();
@@ -104,7 +104,7 @@ public class BluedHook implements IXposedHookLoadPackage, IXposedHookInitPackage
                                     // 3. 获取并转换文件数据为JSON
                                     JSONObject recordsData = new FileToJsonConverter().convertFilesToJson();
                                     msgExtra.put("msgExtra", recordsData);
-                                    
+
                                     // 4. 将msgExtra放入主响应
                                     response.put("msgExtra", msgExtra);
                                     // 5. 广播消息

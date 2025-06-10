@@ -1,5 +1,7 @@
 package com.zjfgh.bluedhook.simple;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.graphics.Color;
 import android.net.Uri;
@@ -156,5 +158,16 @@ public class ModuleTools {
         } catch (IOException e) {
             Log.e("BluedHook", "写出文件失败" + file.getPath(), e);
         }
+    }
+
+    public static void copyToClipboard(Context context, String label, String text) {
+        if (text == null) {
+            ModuleTools.showToast(label + "复制失败", 1);
+            return;
+        }
+        ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText(label, text);
+        clipboard.setPrimaryClip(clip);
+        ModuleTools.showToast(label + "复制成功", 1);
     }
 }
