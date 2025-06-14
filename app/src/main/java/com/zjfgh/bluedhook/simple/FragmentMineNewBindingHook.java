@@ -103,6 +103,7 @@ public class FragmentMineNewBindingHook {
             customPopupWindow.setBackgroundDrawable(modRes.getDrawable(R.drawable.bg_tech_space, null));
             customPopupWindow.setAnimationStyle(android.R.style.Animation_Dialog);
             customPopupWindow.showAtCenter();
+            customPopupWindow.setOnDismissListener(dataAnalyzerView::onDestroy);
         };
     }
 

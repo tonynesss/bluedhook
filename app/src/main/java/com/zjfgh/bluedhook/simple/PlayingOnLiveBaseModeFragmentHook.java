@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.res.XModuleResources;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -47,6 +48,11 @@ public class PlayingOnLiveBaseModeFragmentHook {
     private boolean isWatchingLive = false; // 用于标记是否正在观看直播
     private Timer timer;
     private Object liveRoomManager;
+    private static final long SEND_LIKE_DELAY = 0;
+    private static final long SEND_LIKE_INTERVAL = 300;
+    private Handler sendLikeHandler;
+    private Runnable sendLikeIntervalRunnable;
+    private boolean sendLikeIsRunning = false;
 
     private PlayingOnLiveBaseModeFragmentHook(Context appContext, XModuleResources modRes) {
         this.appContextRef = new WeakReference<>(appContext);
@@ -59,6 +65,7 @@ public class PlayingOnLiveBaseModeFragmentHook {
         watchingAnchorHook();
         liveMsgHandlerHook();
         grpcMsgSenderHook();
+        SendLikeSafeIntervalExecutor();
         startTimer();
     }
 
@@ -78,9 +85,7 @@ public class PlayingOnLiveBaseModeFragmentHook {
         TimerTask timerTask = new TimerTask() {
             @Override
             public void run() {
-                if (isFirstConnect == 1) {
-                    //Log.d("BluedHook", "收到消息->等待首次连接弹幕消息服务...");
-                } else {
+                if (isFirstConnect != 1) {
                     // 每隔10秒执行一次
                     if (!isWatchingLive) {
                         Log.d("BluedHook", "收到消息->当前用户不在直播间页面，检查后台直播弹幕消息是否超时。");
@@ -97,7 +102,6 @@ public class PlayingOnLiveBaseModeFragmentHook {
                     } else {
                         Log.d("BluedHook", "收到消息->当前用户在直播间页面，跳过后台直播弹幕消息超时检查。");
                     }
-
                 }
             }
         };
@@ -312,6 +316,7 @@ public class PlayingOnLiveBaseModeFragmentHook {
     }
 
     private Object bluedUIHttpResponse;
+    private Object grpcMsgSender;
 
     public void grpcMsgSenderHook() {
         Object Any = XposedHelpers.findClass("com.google.protobuf.Any", classLoader);
@@ -536,6 +541,7 @@ public class PlayingOnLiveBaseModeFragmentHook {
                 super.beforeHookedMethod(param);
                 Log.i("BluedHook", "收到消息->直播间消息，类型：手动退出直播间");
                 isWatchingLive = false;
+                sendLikeStop();
                 Thread thread = new Thread(() -> {
                     // 重新连接直播间
                     reConnectLive();
@@ -548,6 +554,92 @@ public class PlayingOnLiveBaseModeFragmentHook {
                 super.afterHookedMethod(param);
             }
         });
+        //Hook构造方法拿到 GrpcMsgSender对象
+        XposedHelpers.findAndHookConstructor("com.blued.android.module.live_china.msg.GrpcMsgSender", classLoader, new XC_MethodHook() {
+            @Override
+            protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                super.beforeHookedMethod(param);
+            }
+
+            @Override
+            protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                super.afterHookedMethod(param);
+                grpcMsgSender = param.thisObject;
+            }
+        });
+        //拦截点赞方法
+        XposedHelpers.findAndHookMethod("com.blued.android.module.live_china.msg.GrpcMsgSender", classLoader, "a", boolean.class, new XC_MethodHook() {
+            @Override
+            protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                super.beforeHookedMethod(param);
+                SettingItem shieldLikeSettingItem = SQLiteManagement.getInstance().getSettingByFunctionId(SettingsViewCreator.SHIELD_LIKE);
+                if (shieldLikeSettingItem.isSwitchOn()) {
+                    sendLikeStop();
+                    param.setResult(null);
+                } else {
+                    SettingItem autoLikeSettingItem = SQLiteManagement.getInstance().getSettingByFunctionId(SettingsViewCreator.AUTO_LIKE);
+                    if (autoLikeSettingItem.isSwitchOn()) {
+                        sendLikeStart();
+                    }
+                }
+            }
+
+            @Override
+            protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                super.afterHookedMethod(param);
+            }
+        });
+        Object IRequestHost = XposedHelpers.findClass("com.blued.android.core.net.IRequestHost", classLoader);
+
+        //拦截点赞start
+        XposedHelpers.findAndHookMethod("com.blued.android.module.live_china.utils.LiveRoomHttpUtils", classLoader, "as", BluedUIHttpResponse, IRequestHost, new XC_MethodHook() {
+            @Override
+            protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                super.beforeHookedMethod(param);
+                SettingItem shieldLikeSettingItem = SQLiteManagement.getInstance().getSettingByFunctionId(SettingsViewCreator.SHIELD_LIKE);
+                if (shieldLikeSettingItem.isSwitchOn()) {
+                    sendLikeStop();
+                    ModuleTools.showBluedToast("屏蔽点赞");
+                    param.setResult(null);
+                }
+            }
+
+            @Override
+            protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                super.afterHookedMethod(param);
+            }
+        });
+    }
+
+    public void SendLikeSafeIntervalExecutor() {
+        sendLikeHandler = new Handler(Looper.getMainLooper());
+        sendLikeIntervalRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!sendLikeIsRunning) return;
+                // 执行你的任务
+                sendLikeDoIntervalTask();
+                // 安排下一次执行
+                sendLikeHandler.postDelayed(this, SEND_LIKE_INTERVAL);
+            }
+        };
+    }
+
+    public void sendLikeStart() {
+        if (sendLikeIsRunning) return;
+        sendLikeIsRunning = true;
+        sendLikeHandler.postDelayed(sendLikeIntervalRunnable, SEND_LIKE_DELAY);
+        ModuleTools.showBluedToast("自动点赞开始");
+    }
+
+    public void sendLikeStop() {
+        sendLikeIsRunning = false;
+        sendLikeHandler.removeCallbacks(sendLikeIntervalRunnable);
+        ModuleTools.showBluedToast("自动点赞停止");
+    }
+
+    private void sendLikeDoIntervalTask() {
+        XposedHelpers.callMethod(grpcMsgSender, "a", false);
     }
 
     private void reConnectLive() {

@@ -1,6 +1,5 @@
 package com.zjfgh.bluedhook.simple;
 
-import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
@@ -10,23 +9,22 @@ import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.LinearInterpolator;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.widget.HorizontalScrollView;
-import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -41,13 +39,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class DataAnalyzerView extends FrameLayout {
-    private String lastSelectedDate = null;
-    private String lastSelectedFileType = null;
     private static final int REFRESH_INTERVAL = 10000; // 10秒刷新间隔
 
     private JSONObject recordsData;
@@ -85,6 +82,20 @@ public class DataAnalyzerView extends FrameLayout {
         put("机长", 5688);
         put("超级影帝", 15888);
         put("猴王仙丹", 8888);
+        put("烛光", 18);
+        put("花灯", 98);
+        put("敦煌恋歌", 198);
+        put("走进敦煌", 508);
+        put("九色神鹿", 688);
+        put("舞动敦煌", 2688);
+        put("飞天传说", 5688);
+        put("[隐藏款]一梦敦煌", 18888);
+        put("神圣体魄", 18);
+        put("黄金手套", 66);
+        put("黄金战靴", 128);
+        put("黄金头盔", 528);
+        put("黄金铠甲", 1288);
+        put("圣剑降临", 5088);
     }};
     private static final Map<String, Integer> LUCKY_GIFT_TYPE = new HashMap<>() {{
         put("幸运手镯", 4);
@@ -230,7 +241,7 @@ public class DataAnalyzerView extends FrameLayout {
                 // 更新UI
                 mainHandler.post(this::updateDateSpinner);
             } catch (JSONException e) {
-                e.printStackTrace();
+                Log.e("BluedHook", "processRecordsData->" + e);
             }
         });
     }
@@ -245,9 +256,7 @@ public class DataAnalyzerView extends FrameLayout {
 
         // 恢复选择
         if (!dates.isEmpty()) {
-            if (lastSelectedDate != null && dates.contains(lastSelectedDate)) {
-                dateSpinner.setSelection(dates.indexOf(lastSelectedDate));
-            } else if (currentSelection != null && dates.contains(currentSelection)) {
+            if (currentSelection != null && dates.contains(currentSelection)) {
                 dateSpinner.setSelection(dates.indexOf(currentSelection));
             } else {
                 dateSpinner.setSelection(0);
@@ -262,7 +271,10 @@ public class DataAnalyzerView extends FrameLayout {
         if (selectedDate == null || !recordsMap.containsKey(selectedDate)) return;
 
         Map<String, List<String>> fileTypesMap = recordsMap.get(selectedDate);
-        List<String> fileTypes = new ArrayList<>(fileTypesMap.keySet());
+        List<String> fileTypes = null;
+        if (fileTypesMap != null) {
+            fileTypes = new ArrayList<>(fileTypesMap.keySet());
+        }
 
         // 保存当前选择
         String currentSelection = (String) fileTypeSpinner.getSelectedItem();
@@ -270,10 +282,8 @@ public class DataAnalyzerView extends FrameLayout {
         ArrayAdapter<String> adapter = getStringArrayAdapter(fileTypes);
         fileTypeSpinner.setAdapter(adapter);
 
-        if (!fileTypes.isEmpty()) {
-            if (lastSelectedFileType != null && fileTypes.contains(lastSelectedFileType)) {
-                fileTypeSpinner.setSelection(fileTypes.indexOf(lastSelectedFileType));
-            } else if (currentSelection != null && fileTypes.contains(currentSelection)) {
+        if (fileTypes != null && !fileTypes.isEmpty()) {
+            if (currentSelection != null && fileTypes.contains(currentSelection)) {
                 fileTypeSpinner.setSelection(fileTypes.indexOf(currentSelection));
             } else {
                 fileTypeSpinner.setSelection(0);
@@ -325,17 +335,19 @@ public class DataAnalyzerView extends FrameLayout {
 
             if (selectedDate == null || selectedFileType == null ||
                     !recordsMap.containsKey(selectedDate) ||
-                    !recordsMap.get(selectedDate).containsKey(selectedFileType)) {
+                    !Objects.requireNonNull(recordsMap.get(selectedDate)).containsKey(selectedFileType)) {
                 return;
             }
 
-            List<String> records = recordsMap.get(selectedDate).get(selectedFileType);
+            List<String> records = Objects.requireNonNull(recordsMap.get(selectedDate)).get(selectedFileType);
             currentRecords.clear();
 
-            for (String record : records) {
-                RecordItem item = parseRecord(record);
-                if (item != null) {
-                    currentRecords.add(item);
+            if (records != null) {
+                for (String record : records) {
+                    RecordItem item = parseRecord(record);
+                    if (item != null) {
+                        currentRecords.add(item);
+                    }
                 }
             }
             Collections.reverse(currentRecords);
@@ -363,12 +375,12 @@ public class DataAnalyzerView extends FrameLayout {
 
     private RecordItem parseGiftRecord(String record) {
         // 正则表达式模式
-        String patternGoldfire = "(\\d{4}年\\d{2}月\\d{2}日 \\d{2}:\\d{2}:\\d{2}) @\\(word:(.*?)\\) 触发金火时刻！获得 @\\(word:(.*?)\\) \\((\\d+)豆\\)x(\\d+)";
-        String patternNormal = "(\\d{4}年\\d{2}月\\d{2}日 \\d{2}:\\d{2}:\\d{2}) 恭喜 @\\(word:(.*?)\\) 炼化获得 @\\(word:(.*?)\\) \\((\\d+)豆\\)x(\\d+)";
-        String patternMultiple = "(\\d{4}年\\d{2}月\\d{2}日 \\d{2}:\\d{2}:\\d{2}) 恭喜 @\\(word:(.*?)\\) 触发(\\d+\\.?\\d*)倍炼化，获得 @\\(word:(.*?)\\) \\((\\d+)豆\\)x(\\d+)";
+        String patternGoldFire = "(\\d{4}年\\d{2}月\\d{2}日 \\d{2}:\\d{2}:\\d{2}(?:\\.\\d{3})?) @\\(word:(.*?)\\) 触发金火时刻！获得 @\\(word:(.*?)\\) \\((\\d+)豆\\)x(\\d+)";
+        String patternNormal = "(\\d{4}年\\d{2}月\\d{2}日 \\d{2}:\\d{2}:\\d{2}(?:\\.\\d{3})?) 恭喜 @\\(word:(.*?)\\) 炼化获得 @\\(word:(.*?)\\) \\((\\d+)豆\\)x(\\d+)";
+        String patternMultiple = "(\\d{4}年\\d{2}月\\d{2}日 \\d{2}:\\d{2}:\\d{2}(?:\\.\\d{3})?) 恭喜 @\\(word:(.*?)\\) 触发(\\d+\\.?\\d*)倍炼化，获得 @\\(word:(.*?)\\) \\((\\d+)豆\\)x(\\d+)";
 
         java.util.regex.Pattern[] patterns = {
-                java.util.regex.Pattern.compile(patternGoldfire),
+                java.util.regex.Pattern.compile(patternGoldFire),
                 java.util.regex.Pattern.compile(patternNormal),
                 java.util.regex.Pattern.compile(patternMultiple)
         };
@@ -381,19 +393,15 @@ public class DataAnalyzerView extends FrameLayout {
                 String gift;
                 int beans;
                 int count;
-                float multiple = 1.0f;
-
                 if (matcher.groupCount() == 5) {
                     gift = matcher.group(3);
-                    beans = Integer.parseInt(matcher.group(4));
-                    count = Integer.parseInt(matcher.group(5));
+                    beans = Integer.parseInt(Objects.requireNonNull(matcher.group(4)));
+                    count = Integer.parseInt(Objects.requireNonNull(matcher.group(5)));
                 } else {
-                    multiple = Float.parseFloat(matcher.group(3));
                     gift = matcher.group(4);
-                    beans = Integer.parseInt(matcher.group(5));
-                    count = Integer.parseInt(matcher.group(6));
+                    beans = Integer.parseInt(Objects.requireNonNull(matcher.group(5)));
+                    count = Integer.parseInt(Objects.requireNonNull(matcher.group(6)));
                 }
-
                 int total = beans * count;
                 return new RecordItem(
                         time,
@@ -411,7 +419,7 @@ public class DataAnalyzerView extends FrameLayout {
     }
 
     private RecordItem parseLotteryRecord(String record) {
-        String pattern = "(\\d{4}年\\d{2}月\\d{2}日 \\d{2}:\\d{2}:\\d{2}) 恭喜@\\(word:(\\w+)\\)触发@\\(word:(\\d+)\\)倍，获得@\\(word:(\\d+)\\)豆";
+        String pattern = "(\\d{4}年\\d{2}月\\d{2}日 \\d{2}:\\d{2}:\\d{2}(?:\\.\\d{3})?) 恭喜@\\(word:(\\w+)\\)触发@\\(word:(\\d+)\\)倍，获得@\\(word:(\\d+)\\)豆";
         java.util.regex.Pattern p = java.util.regex.Pattern.compile(pattern);
         java.util.regex.Matcher matcher = p.matcher(record);
 
@@ -448,17 +456,16 @@ public class DataAnalyzerView extends FrameLayout {
     }
 
     private RecordItem parseEggRecord(String record) {
-        String pattern = "(\\d{4}年\\d{2}月\\d{2}日 \\d{2}:\\d{2}:\\d{2}) @\\(word:([^)]+)\\) 送 @\\(word:([^)]+)\\) @\\(word:(\\d+)\\) 个 @\\(word:<扭蛋礼物>([^)]+)\\)，.*";
+        String pattern = "(\\d{4}年\\d{2}月\\d{2}日 \\d{2}:\\d{2}:\\d{2}(?:\\.\\d{3})?) @\\(word:([^)]+)\\) 送 @\\(word:([^)]+)\\) @\\(word:(\\d+)\\) 个 @\\(word:<扭蛋礼物>([^)]+)\\)，.*";
         java.util.regex.Pattern p = java.util.regex.Pattern.compile(pattern);
         java.util.regex.Matcher matcher = p.matcher(record);
         if (matcher.find()) {
             String time = matcher.group(1);
             String user = matcher.group(2);
             String receiver = matcher.group(3);
-            int count = Integer.parseInt(matcher.group(4));
-            String gift = matcher.group(5).trim();
-            int beans = GIFT_VALUES.getOrDefault(gift, 0);
-            int total = beans;
+            int count = Integer.parseInt(Objects.requireNonNull(matcher.group(4)));
+            String gift = Objects.requireNonNull(matcher.group(5)).trim();
+            int beans = Optional.ofNullable(GIFT_VALUES.get(gift)).orElse(0);
             return new RecordItem(
                     time,
                     "扭蛋",
@@ -466,7 +473,7 @@ public class DataAnalyzerView extends FrameLayout {
                     gift,
                     String.valueOf(beans),
                     "x" + count,
-                    String.valueOf(total),
+                    String.valueOf(beans),
                     receiver
             );
         }
@@ -543,16 +550,6 @@ public class DataAnalyzerView extends FrameLayout {
             String timePart = maxRecord.time;
             @SuppressLint("DefaultLocale") String summary = String.format("近期最大出奖 %s %s 抽出 %s %d 倍 共 %s 豆。",
                     timePart, maxRecord.user, maxRecord.gift, maxMultiplier, maxRecord.total);
-
-//            // 添加最近三条记录
-//            int count = Math.min(3, filteredRecords.size());
-//            for (int i = filteredRecords.size() - 1; i >= filteredRecords.size() - count; i--) {
-//                RecordItem item = filteredRecords.get(i);
-//                String itemTime = item.time;
-//                summary += String.format(" %s %s 抽中 %s 倍 %s，获得 %s 豆。\n\n",
-//                        itemTime, item.user, item.count, item.gift, item.total);
-//            }
-
             summaryTextView.setText(summary);
         } else {
             summaryTextView.setText("没有可用的统计信息");
@@ -601,7 +598,7 @@ public class DataAnalyzerView extends FrameLayout {
     }
 
     // RecyclerView适配器
-    private static class RecordAdapter extends RecyclerView.Adapter<RecordViewHolder> {
+    private class RecordAdapter extends RecyclerView.Adapter<RecordViewHolder> {
         private List<RecordItem> records;
 
         public RecordAdapter(List<RecordItem> records) {
@@ -609,8 +606,42 @@ public class DataAnalyzerView extends FrameLayout {
         }
 
         public void updateRecords(List<RecordItem> newRecords) {
-            this.records = newRecords;
-            notifyDataSetChanged();
+            DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new RecordDiffCallback(this.records, newRecords));
+            this.records = new ArrayList<>(newRecords); // 创建新列表避免引用问题
+            diffResult.dispatchUpdatesTo(this); // 自动计算最小更新集
+        }
+
+        // 自定义DiffCallback
+        private class RecordDiffCallback extends DiffUtil.Callback {
+            private final List<RecordItem> oldList;
+            private final List<RecordItem> newList;
+
+            public RecordDiffCallback(List<RecordItem> oldList, List<RecordItem> newList) {
+                this.oldList = oldList;
+                this.newList = newList;
+            }
+
+            @Override
+            public int getOldListSize() {
+                return oldList.size();
+            }
+
+            @Override
+            public int getNewListSize() {
+                return newList.size();
+            }
+
+            @Override
+            public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
+                // 判断是否是同一个item（通常比较唯一ID）
+                return Objects.equals(oldList.get(oldItemPosition).time, newList.get(newItemPosition).time);
+            }
+
+            @Override
+            public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
+                // 判断内容是否相同
+                return oldList.get(oldItemPosition).equals(newList.get(newItemPosition));
+            }
         }
 
         @NonNull
@@ -618,13 +649,13 @@ public class DataAnalyzerView extends FrameLayout {
         public RecordViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(parent.getContext())
                     .inflate(AppContainer.getInstance().getModuleRes().getLayout(R.layout.record_item), parent, false);
-            return new RecordViewHolder(view);
+            return new RecordViewHolder(view, this);
         }
 
         @Override
         public void onBindViewHolder(@NonNull RecordViewHolder holder, int position) {
             RecordItem item = records.get(position);
-            holder.bind(item);
+            holder.bind(item, position);
         }
 
         @Override
@@ -633,11 +664,13 @@ public class DataAnalyzerView extends FrameLayout {
         }
     }
 
+    private int totalBeans;
+
     // ViewHolder类
-    private static class RecordViewHolder extends RecyclerView.ViewHolder {
+    private class RecordViewHolder extends RecyclerView.ViewHolder {
         // 这里应该定义记录项的各个TextView
-        private final HorizontalScrollView scrollView;
-        private final LinearLayout contentLayout;
+        private final RecordAdapter adapter;
+        private final View parentView;
         private final TextView timeView;
         private final TextView giftTypeView;
         private final TextView userView;
@@ -647,9 +680,10 @@ public class DataAnalyzerView extends FrameLayout {
         private final TextView totalView;
         private final TextView toAnchorView;
 
-        public RecordViewHolder(@NonNull View itemView) {
+        public RecordViewHolder(@NonNull View itemView, RecordAdapter adapter) {
             super(itemView);
             // 初始化各个TextView
+            this.adapter = adapter;
             timeView = itemView.findViewById(R.id.time_text);
             giftTypeView = itemView.findViewById(R.id.gift_type_text);
             userView = itemView.findViewById(R.id.user_text);
@@ -658,31 +692,11 @@ public class DataAnalyzerView extends FrameLayout {
             countView = itemView.findViewById(R.id.count_text);
             totalView = itemView.findViewById(R.id.total_text);
             toAnchorView = itemView.findViewById(R.id.to_anchor_text);
-            scrollView = itemView.findViewById(R.id.scrollView);
-            contentLayout = itemView.findViewById(R.id.contentLayout);
-            // 添加全局布局监听器
-//            contentLayout.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-//                @Override
-//                public void onGlobalLayout() {
-//                    contentLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-//
-//                    // 检查内容是否超出屏幕
-//                    if (contentLayout.getWidth() > scrollView.getWidth()) {
-//                        // 使用Handler延迟执行滚动，确保布局已完成
-//                        new Handler().postDelayed(() -> {
-//                            // 平滑滚动到最右端
-//                            scrollView.fullScroll(HorizontalScrollView.FOCUS_RIGHT);
-//
-//                            // 可选：设置自动来回滚动动画
-//                            //startAutoScrolling(scrollView, contentLayout);
-//                        }, 1000); // 1秒后开始滚动
-//                    }
-//                }
-//            });
+            parentView = (View) timeView.getParent();
         }
 
         @SuppressLint("SetTextI18n")
-        public void bind(RecordItem item) {
+        public void bind(RecordItem item, int position) {
             String[] dateTime = item.time.split(" ");
             timeView.setText(dateTime[1]);
             giftTypeView.setText(item.giftType);
@@ -698,26 +712,17 @@ public class DataAnalyzerView extends FrameLayout {
             String s = timeView.getText().toString() + giftTypeView.getText()
                     + userView.getText() + giftView.getText() + beansView.getText()
                     + countView.getText() + totalView.getText() + toAnchorView.getText();
-            View parentView = (View) timeView.getParent();
             parentView.setOnClickListener(v -> ModuleTools.copyToClipboard(AppContainer.getInstance().getBluedContext(), "飘屏内容", s));
-        }
-
-        // 自动滚动方法
-        private void startAutoScrolling(final HorizontalScrollView scrollView, final LinearLayout contentLayout) {
-            final int scrollDuration = 15000; // 15秒完成一次完整滚动
-            final int totalWidth = contentLayout.getWidth() - scrollView.getWidth();
-
-            ValueAnimator animator = ValueAnimator.ofInt(0, totalWidth);
-            animator.setDuration(scrollDuration);
-            animator.setInterpolator(new LinearInterpolator());
-            animator.addUpdateListener(animation -> {
-                int scrollTo = (int) animation.getAnimatedValue();
-                scrollView.scrollTo(scrollTo, 0);
+            // 设置长按事件
+            parentView.setOnLongClickListener(v -> {
+                totalBeans = 0;
+                for (int i = position + 1; i < adapter.getItemCount(); i++) {
+                    RecordItem positionItem = adapter.records.get(i);
+                    totalBeans += Integer.parseInt(positionItem.total);
+                    ModuleTools.showBluedToast("该用户之前累计礼物总豆" + totalBeans);
+                }
+                return true;
             });
-            // 设置无限循环
-            animator.setRepeatCount(ValueAnimator.INFINITE);
-            animator.setRepeatMode(ValueAnimator.REVERSE);
-            animator.start();
         }
     }
 }

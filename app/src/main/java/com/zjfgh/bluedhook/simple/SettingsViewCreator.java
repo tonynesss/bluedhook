@@ -24,6 +24,8 @@ public class SettingsViewCreator {
     public static final int LIVE_JOIN_HIDE_HOOK = 3;
     public static final int WS_SERVER = 4;
     public static final int REC_HEW_HORN = 5;
+    public static final int SHIELD_LIKE = 6;
+    public static final int AUTO_LIKE = 7;
 
     public SettingsViewCreator(Context context) {
         this.context = context;
@@ -170,6 +172,22 @@ public class SettingsViewCreator {
                 "记录飘屏",
                 false,
                 "记录抽奖飘屏",
+                "",
+                ""
+        ));
+        dbManager.addOrUpdateSetting(new SettingItem(SHIELD_LIKE,
+                "屏蔽点赞",
+                false,
+                "屏蔽直播间自己的点赞，以免误触导致主播看到你。\n" +
+                        "注：仅屏蔽发送过程，不会屏蔽本地点赞特效或震动",
+                "",
+                ""
+        ));
+        dbManager.addOrUpdateSetting(new SettingItem(AUTO_LIKE,
+                "直播间自动点赞",
+                false,
+                "进入直播间手动触发一次点赞后，会持续发送点赞消息。\n" +
+                        "注：使用此功能需先关闭屏蔽点赞开关，如需停止自动点赞，请退出直播间或关闭小窗。",
                 "",
                 ""
         ));

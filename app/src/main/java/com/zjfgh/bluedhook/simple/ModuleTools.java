@@ -139,7 +139,7 @@ public class ModuleTools {
 
     public static void writeFile(String fileName, String content) {
         Date date = new Date();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss", Locale.getDefault());
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss.SSS", Locale.getDefault());
         String currentTime = sdf.format(date);
         SimpleDateFormat ymd = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         String currentTMD = ymd.format(date);
