@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.alibaba.fastjson2.JSON;
@@ -165,6 +166,100 @@ public class PlayingOnLiveBaseModeFragmentHook {
                             LinearLayout ll_gift_tips = llLiveGiftTips.findViewById(R.id.ll_gift_tips);
                             ll_gift_tips.setBackground(modRes.getDrawable(R.drawable.bg_zise_tag, null));
                             liveMsgListRef.get().addView(llLiveGiftTips, 0);
+                            @SuppressLint("DiscouragedApi") int rl_top_info_rootID = appContextRef.get().getResources().getIdentifier("rl_top_info_root", "id", appContextRef.get().getPackageName());
+                            ViewGroup rl_top_info_root = view.findViewById(rl_top_info_rootID);
+                            int live_operation_viewID = appContextRef.get().getResources().getIdentifier("live_operation_view", "id", appContextRef.get().getPackageName());
+                            TagLayout firstTg = new TagLayout(appContextRef.get());
+                            firstTg.setPadding(0, ModuleTools.dpToPx(10), 0, 0);
+                            firstTg.setFirstMarginStartSize(10);
+                            TextView liveJoinHide = firstTg.addTextView("隐身", 10, modRes.getDrawable(R.drawable.bg_tech_progress_fill, null));
+                            SettingItem liveJoinSetting = SQLiteManagement.getInstance().getSettingByFunctionId(SettingsViewCreator.LIVE_JOIN_HIDE_HOOK);
+                            liveJoinHide.setTag(liveJoinSetting.isSwitchOn());
+                            if (!liveJoinSetting.isSwitchOn()) {
+                                liveJoinHide.setBackground(modRes.getDrawable(R.drawable.bg_gray_round_5_dp, null));
+                            }
+                            liveJoinHide.setOnClickListener(v -> {
+                                boolean isChecked = (boolean) v.getTag();
+                                if (isChecked) {
+                                    v.setTag(false);
+                                    v.setBackground(modRes.getDrawable(R.drawable.bg_gray_round_5_dp, null));
+                                    SQLiteManagement.getInstance().updateSettingSwitchState(SettingsViewCreator.LIVE_JOIN_HIDE_HOOK, false);
+                                } else {
+                                    v.setTag(true);
+                                    v.setBackground(modRes.getDrawable(R.drawable.bg_tech_progress_fill, null));
+                                    SQLiteManagement.getInstance().updateSettingSwitchState(SettingsViewCreator.LIVE_JOIN_HIDE_HOOK, true);
+                                }
+                            });
+                            TextView shieldLike = firstTg.addTextView("屏蔽点赞", 10, modRes.getDrawable(R.drawable.bg_rounded, null));
+                            SettingItem shieldLikeSetting = SQLiteManagement.getInstance().getSettingByFunctionId(SettingsViewCreator.SHIELD_LIKE);
+                            shieldLike.setTag(shieldLikeSetting.isSwitchOn());
+                            TextView autoLike = firstTg.addTextView("自动点赞", 10, modRes.getDrawable(R.drawable.bg_orange, null));
+                            if (!shieldLikeSetting.isSwitchOn()) {
+                                shieldLike.setBackground(modRes.getDrawable(R.drawable.bg_gray_round_5_dp, null));
+                            } else {
+                                autoLike.setVisibility(View.GONE);
+                            }
+                            SettingItem autoLikeSetting = SQLiteManagement.getInstance().getSettingByFunctionId(SettingsViewCreator.AUTO_LIKE);
+                            autoLike.setTag(autoLikeSetting.isSwitchOn());
+                            if (!autoLikeSetting.isSwitchOn()) {
+                                autoLike.setBackground(modRes.getDrawable(R.drawable.bg_gray_round_5_dp, null));
+                            }
+                            autoLike.setOnClickListener(v -> {
+                                boolean isChecked = (boolean) v.getTag();
+                                if (isChecked) {
+                                    v.setTag(false);
+                                    sendLikeStop();
+                                    v.setBackground(modRes.getDrawable(R.drawable.bg_gray_round_5_dp, null));
+                                    SQLiteManagement.getInstance().updateSettingSwitchState(SettingsViewCreator.AUTO_LIKE, false);
+                                } else {
+                                    v.setTag(true);
+                                    v.setBackground(modRes.getDrawable(R.drawable.bg_orange, null));
+                                    SQLiteManagement.getInstance().updateSettingSwitchState(SettingsViewCreator.AUTO_LIKE, true);
+                                }
+                            });
+                            shieldLike.setOnClickListener(v -> {
+                                boolean isChecked = (boolean) v.getTag();
+                                if (isChecked) {
+                                    v.setTag(false);
+                                    autoLike.setVisibility(View.VISIBLE);
+                                    v.setBackground(modRes.getDrawable(R.drawable.bg_gray_round_5_dp, null));
+                                    SQLiteManagement.getInstance().updateSettingSwitchState(SettingsViewCreator.SHIELD_LIKE, false);
+                                } else {
+                                    v.setTag(true);
+                                    autoLike.setVisibility(View.GONE);
+                                    v.setBackground(modRes.getDrawable(R.drawable.bg_rounded, null));
+                                    SQLiteManagement.getInstance().updateSettingSwitchState(SettingsViewCreator.SHIELD_LIKE, true);
+                                }
+                            });
+                            // 设置 RelativeLayout.LayoutParams，让 tagLayout 在 live_operation_view 下方
+                            RelativeLayout.LayoutParams firstTgParams = new RelativeLayout.LayoutParams(
+                                    RelativeLayout.LayoutParams.WRAP_CONTENT,
+                                    RelativeLayout.LayoutParams.WRAP_CONTENT
+                            );
+                            firstTgParams.addRule(RelativeLayout.BELOW, live_operation_viewID); // 关键：设置 BELOW 规则
+                            firstTg.setLayoutParams(firstTgParams);
+                            firstTg.setId(View.generateViewId());
+                            rl_top_info_root.addView(firstTg);
+                            TagLayout secondTg = new TagLayout(appContextRef.get());
+                            RelativeLayout.LayoutParams secondTgParams = new RelativeLayout.LayoutParams(
+                                    RelativeLayout.LayoutParams.WRAP_CONTENT,
+                                    RelativeLayout.LayoutParams.WRAP_CONTENT
+                            );
+                            secondTgParams.addRule(RelativeLayout.BELOW, firstTg.getId());
+                            secondTg.setLayoutParams(secondTgParams);
+                            leaveLiveMsgSend = secondTg.addTextView("发送看客退出提示", 10, modRes.getDrawable(R.drawable.bg_gray_round_5_dp, null));
+                            leaveLiveMsgSend.setTag(false);
+                            leaveLiveMsgSend.setOnClickListener(v -> {
+                                boolean isSend = (boolean) v.getTag();
+                                if (isSend) {
+                                    v.setTag(false);
+                                    v.setBackground(modRes.getDrawable(R.drawable.bg_gray_round_5_dp, null));
+                                } else {
+                                    v.setTag(true);
+                                    v.setBackground(modRes.getDrawable(R.drawable.bg_green_rounded, null));
+                                }
+                            });
+                            rl_top_info_root.addView(secondTg);
                         } else {
                             textView2Ref = new WeakReference<>(textView);
                         }
@@ -317,6 +412,7 @@ public class PlayingOnLiveBaseModeFragmentHook {
 
     private Object bluedUIHttpResponse;
     private Object grpcMsgSender;
+    private TextView leaveLiveMsgSend;
 
     public void grpcMsgSenderHook() {
         Object Any = XposedHelpers.findClass("com.google.protobuf.Any", classLoader);
@@ -358,6 +454,10 @@ public class PlayingOnLiveBaseModeFragmentHook {
                                 String name = (String) XposedHelpers.callMethod(profile, "getName");
                                 Log.i("BluedHook", "收到消息->直播间消息：" + name + " 退出了直播间");
                                 ModuleTools.showBluedToast(name + " 退出了直播间");
+                                if ((boolean) leaveLiveMsgSend.getTag() && isWatchingLive) {
+                                    LiveMsgSendManagerHook.startSendMsg(name + " 退出了直播间");
+                                    Log.d("BluedHook", "收到消息->直播间消息：" + name + " 退出了直播间，并发送到公屏。");
+                                }
                                 if (BluedHook.wsServerManager.isServerRunning()) {
                                     JSONObject jsonObject = new JSONObject();
                                     jsonObject.put("msgType", typeValue);
@@ -599,7 +699,6 @@ public class PlayingOnLiveBaseModeFragmentHook {
                 SettingItem shieldLikeSettingItem = SQLiteManagement.getInstance().getSettingByFunctionId(SettingsViewCreator.SHIELD_LIKE);
                 if (shieldLikeSettingItem.isSwitchOn()) {
                     sendLikeStop();
-                    ModuleTools.showBluedToast("屏蔽点赞");
                     param.setResult(null);
                 }
             }
@@ -633,9 +732,11 @@ public class PlayingOnLiveBaseModeFragmentHook {
     }
 
     public void sendLikeStop() {
-        sendLikeIsRunning = false;
-        sendLikeHandler.removeCallbacks(sendLikeIntervalRunnable);
-        ModuleTools.showBluedToast("自动点赞停止");
+        if (sendLikeIsRunning) {
+            sendLikeIsRunning = false;
+            sendLikeHandler.removeCallbacks(sendLikeIntervalRunnable);
+            ModuleTools.showBluedToast("自动点赞停止");
+        }
     }
 
     private void sendLikeDoIntervalTask() {

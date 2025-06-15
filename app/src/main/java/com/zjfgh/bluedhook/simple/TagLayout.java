@@ -31,17 +31,8 @@ public class TagLayout extends LinearLayout {
                 ViewGroup.LayoutParams.WRAP_CONTENT));
     }
 
-    private boolean isFirstMargin;
+    private float firstMarginStartSize = 5;
     private float marginStartSize = 5;
-
-    /**
-     * 设置第一个TextView是否有外边距
-     *
-     * @param isFirstMargin 是否有外边距
-     */
-    public void isFirstMargin(boolean isFirstMargin) {
-        this.isFirstMargin = isFirstMargin;
-    }
 
     /**
      * 设置左外边距大小，请在添加文本标签前设置，否则无效。
@@ -50,6 +41,23 @@ public class TagLayout extends LinearLayout {
      */
     public void setMarginStart(float size) {
         this.marginStartSize = size;
+    }
+
+    /**
+     * 设置首个标签左外边距大小。
+     *
+     * @param size 外边距大小
+     */
+    public void setFirstMarginStartSize(float size) {
+        this.firstMarginStartSize = size;
+        if (getChildCount() != 0) {
+            TextView textView = (TextView) getChildAt(0);
+            LayoutParams params = new LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT);
+            params.setMarginStart(dpToPx(firstMarginStartSize));
+            textView.setLayoutParams(params);
+        }
     }
 
     /**
@@ -64,7 +72,9 @@ public class TagLayout extends LinearLayout {
         LayoutParams params = new LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT);
-        if (getChildCount() != 0 || isFirstMargin) {
+        if (getChildCount() == 0) {
+            params.setMarginStart(dpToPx(firstMarginStartSize));
+        } else {
             params.setMarginStart(dpToPx(marginStartSize));
         }
         textView.setLayoutParams(params);

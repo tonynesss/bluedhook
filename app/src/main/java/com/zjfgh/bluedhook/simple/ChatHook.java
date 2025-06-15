@@ -73,7 +73,6 @@ public class ChatHook {
                                 short originalType = XposedHelpers.getShortField(originalMsg, "msgType");
                                 // 获取原始消息发送者昵称
                                 String originalNickName = (String) XposedHelpers.getObjectField(originalMsg, "fromNickName");
-                                ;
                                 // 获取原始消息内容
                                 String originalContent = (String) XposedHelpers.getObjectField(originalMsg, "msgContent");
                                 if (originalType == 55) {
@@ -443,12 +442,11 @@ public class ChatHook {
             protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                 super.beforeHookedMethod(param);
                 View n = (View) XposedHelpers.getObjectField(param.thisObject, "n");
-                int msg_chatting_titleId = getSafeContext().getResources().getIdentifier("msg_chatting_title", "id", getSafeContext().getPackageName());
+                @SuppressLint("DiscouragedApi") int msg_chatting_titleId = getSafeContext().getResources().getIdentifier("msg_chatting_title", "id", getSafeContext().getPackageName());
                 View findViewById = n.findViewById(msg_chatting_titleId);
-                int ll_center_distanceId = getSafeContext().getResources().getIdentifier("ll_center_distance", "id", getSafeContext().getPackageName());
+                @SuppressLint("DiscouragedApi") int ll_center_distanceId = getSafeContext().getResources().getIdentifier("ll_center_distance", "id", getSafeContext().getPackageName());
                 LinearLayout ll_center_distance = findViewById.findViewById(ll_center_distanceId);
                 TagLayout tlTitle = new TagLayout(n.getContext());
-                tlTitle.isFirstMargin(true);
                 tv_chat_read_msg = tlTitle.addTextView("悄悄查看", 9, modRes.getDrawable(R.drawable.bg_orange, null));
                 tv_recall_msg = tlTitle.addTextView("防撤回", 9, modRes.getDrawable(R.drawable.bg_gradient_orange, null));
                 tv_recall_msg.setVisibility(View.GONE);

@@ -87,7 +87,6 @@ public class NearbyPeopleFragment_ViewBindingHook {
 
                         Log.e("BluedHook", "layoutSort: " + layoutSort);
                         TagLayout tagLayout = new TagLayout(context);
-                        tagLayout.isFirstMargin(true);
                         tagLayout.setMarginStart(15);
                         tvFindPeople = tagLayout.addTextView(
                                 "寻找目标",

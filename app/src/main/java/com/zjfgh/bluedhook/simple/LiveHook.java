@@ -8,7 +8,6 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
@@ -165,7 +164,6 @@ public class LiveHook {
                 SettingItem settingItem = SQLiteManagement.getInstance().getSettingByFunctionId(SettingsViewCreator.LIVE_JOIN_HIDE_HOOK);
                 if (settingItem.isSwitchOn()) {
                     param.args[3] = 2;
-                    ModuleTools.showToast("隐身进入直播间", Toast.LENGTH_SHORT);
                 }
             }
 
