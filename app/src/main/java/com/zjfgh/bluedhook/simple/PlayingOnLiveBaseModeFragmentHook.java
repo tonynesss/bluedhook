@@ -247,6 +247,8 @@ public class PlayingOnLiveBaseModeFragmentHook {
                             );
                             secondTgParams.addRule(RelativeLayout.BELOW, firstTg.getId());
                             secondTg.setLayoutParams(secondTgParams);
+                            secondTg.setPadding(0, ModuleTools.dpToPx(10), 0, 0);
+                            secondTg.setFirstMarginStartSize(10);
                             leaveLiveMsgSend = secondTg.addTextView("发送看客退出提示", 10, modRes.getDrawable(R.drawable.bg_gray_round_5_dp, null));
                             leaveLiveMsgSend.setTag(false);
                             leaveLiveMsgSend.setOnClickListener(v -> {
