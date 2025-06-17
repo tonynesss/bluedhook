@@ -56,3 +56,11 @@ jobs:
       run: ./gradlew clean assembleRelease --stacktrace
       env:
         JAVA_OPTS: "-Xmx4g"
+        
+    - name: 上传APK产物
+      uses: actions/upload-artifact@v3
+      with:
+        name: release-apk
+        path: |
+          app/build/outputs/apk/release/*.apk
+#          app/build/outputs/mapping/release/*.txt  # 如果需要上传mapping文件
