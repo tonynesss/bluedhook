@@ -52,7 +52,7 @@ jobs:
         # 增加AAPT2可用内存
         GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2"
         
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
-    - name: Build with Gradle
-      run: ./gradlew build
+    - name: 构建APK
+      run: ./gradlew clean assembleRelease --stacktrace
+      env:
+        JAVA_OPTS: "-Xmx4g"
