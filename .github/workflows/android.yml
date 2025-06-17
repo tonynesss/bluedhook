@@ -47,7 +47,7 @@ jobs:
 
     # ========== 新增的关键步骤 ==========
     - name: 上传APK产物
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: release-apk
         path: |
