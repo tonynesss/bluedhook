@@ -21,22 +21,26 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: gradle
-    # 关键步骤：安装图片优化工具并处理PNG文件
-    - name: 优化PNG资源文件
+        
+    - name: 修复并优化图片资源
       run: |
         sudo apt-get update
-        sudo apt-get install -y pngquant optipng
-        echo "正在优化res目录下的PNG文件..."
-        find app/src/main/res -name "*.png" -print0 | while IFS= read -r -d '' file; do
-          echo "优化: $file"
-          pngquant --force --quality 60-85 --skip-if-larger --output "$file.tmp" "$file"
-          mv "$file.tmp" "$file"
-          optipng -quiet -o2 "$file"
+        sudo apt-get install -y imagemagick webp pngquant optipng
+        
+        # 修复损坏的PNG并转换为WebP
+        find app/src/main/res -name "*.png" | while read file; do
+          if ! identify "$file" &>/dev/null; then
+            echo "⚠️ 修复损坏的PNG: $file"
+            convert "$file" -define png:format=png32 "${file}.fixed" && mv "${file}.fixed" "$file"
+          fi
+          
+          # 转换为WebP（可选）
+          cwebp -q 80 "$file" -o "${file%.*}.webp" && rm "$file"
         done
     
     - name: 授予gradlew执行权限
       run: chmod +x gradlew
-    
+      
     # 增加构建内存并启用详细日志
     - name: 使用Gradle构建
       run: |
