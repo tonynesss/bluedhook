@@ -1,21 +1,59 @@
-name: 推送Android CI
+name: 推送打包Android CI
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    
+    # 增加构建超时时间（AAPT2处理大资源文件可能需要更长时间）
+    timeout-minutes: 30
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-      - name: Install pngquant (优化 PNG)
-        run: sudo apt-get install -y pngquant
-      - name: Build with Gradle
-        run: |
-          chmod +x gradlew
-          ./gradlew clean build --stacktrace
-        env:
-          JAVA_OPTS: "-Xmx4g"  # 增加 JVM 内存
+    - uses: actions/checkout@v4
+    
+    - name: 设置JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: gradle
+    
+    # 关键步骤：安装图片优化工具并处理PNG文件
+    - name: 优化PNG资源文件
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y pngquant optipng
+        echo "正在优化res目录下的PNG文件..."
+        find app/src/main/res -name "*.png" -print0 | while IFS= read -r -d '' file; do
+          echo "优化: $file"
+          pngquant --force --quality 60-85 --skip-if-larger --output "$file.tmp" "$file"
+          mv "$file.tmp" "$file"
+          optipng -quiet -o2 "$file"
+        done
+    
+    - name: 授予gradlew执行权限
+      run: chmod +x gradlew
+    
+    # 增加构建内存并启用详细日志
+    - name: 使用Gradle构建
+      run: |
+        ./gradlew clean assembleRelease \
+          --stacktrace \
+          --info \
+          -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g"
+      env:
+        # 增加AAPT2可用内存
+        GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2"
+    
+    # 可选：上传构建产物
+    - name: 上传APK
+      if: success()
+      uses: actions/upload-artifact@v3
+      with:
+        name: release-apk
+        path: app/build/outputs/apk/bluehook.apk
